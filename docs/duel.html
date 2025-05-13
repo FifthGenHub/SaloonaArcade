@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="DexHunt: Cowboy Reflex Showdown - Test your reflexes in a Wild West showdown on Saloona Arcade!" name="description"/>
+  <meta content="DexHunt, quick-draw duel, Saloona Arcade, Wild West game, blockchain gaming, Solana" name="keywords"/>
+  <meta content="Saloona Crew" name="author"/>
+  <title>DexHunt: Cowboy Reflex Showdown | Saloona Arcade</title>
+  <link href="assets/favicon.png" rel="icon" type="image/png"/>
+  <link as="audio" href="assets/sounds/background_music.mp3" rel="preload"/>
+  <link href="/site.webmanifest" rel="manifest"/>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Courier New', Courier, monospace;
+      background: #000;
+      color: #ffc34d;
+      text-align: center;
+      transition: background-color 0.3s, color 0.3s;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, transparent 50%, rgba(0, 0, 0, 0.5) 100%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body.dark-mode {
+      background: #1a1a1a;
+      color: #d3d3d3;
+    }
+
+    body.dark-mode .game-container,
+    body.dark-mode .top-bar,
+    body.dark-mode .log,
+    body.dark-mode .leaderboard-popup,
+    body.dark-mode .tutorial-popup,
+    body.dark-mode .double-or-nothing-popup,
+    body.dark-mode .settings-popup,
+    body.dark-mode .cookie-consent {
+      background: rgba(40, 40, 40, 0.85);
+    }
+
+    body.dark-mode .wallet-btn,
+    body.dark-mode .start-btn,
+    body.dark-mode .links-leaderboard-btn,
+    body.dark-mode .settings-btn,
+    body.dark-mode .share-btn,
+    body.dark-mode .sound-toggle-btn,
+    body.dark-mode .reset-btn,
+    body.dark-mode .cookie-btn {
+      background: #b33c00;
+    }
+
+    .game-container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 1;
+    }
+
+    .top-bar {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      padding: 5px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+      border-bottom: 3px solid #ffcc00;
+      box-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .top-bar h1 {
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      margin: 0;
+      color: #ffc34d;
+      text-shadow: 2px 2px #000, 0 0 10px #ffcc00;
+      font-family: 'Courier New', monospace;
+      flex: 1;
+      text-align: left;
+    }
+
+    .top-bar .button-row {
+      display: flex;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+      background: none;
+      box-shadow: none;
+      flex-wrap: nowrap;
+    }
+
+    .top-bar .wallet-hud {
+      font-size: clamp(0.8rem, 1.5vw, 1rem);
+      color: #00ffff;
+      padding: 5px 10px;
+      border-left: 2px solid #00ffff;
+      border-bottom: 2px solid #00ffff;
+      border-bottom-left-radius: 8px;
+    }
+
+    .top-bar .beta-label {
+      font-size: clamp(0.8rem, 1.5vw, 1rem);
+      color: #ff00ff;
+      padding: 5px 10px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 5px;
+      margin-left: 10px;
+    }
+
+    .button-row button {
+      background: #1a1a1a;
+      border: 2px solid #ff9900;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: clamp(0.8rem, 1.5vw, 1rem);
+      cursor: pointer;
+      color: #f0c420;
+      font-weight: bold;
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s, background-color 0.3s;
+    }
+
+    .duel-area {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: auto;
+      margin-top: 10px;
+      margin-bottom: 40px;
+      overflow: hidden;
+    }
+
+    .start-btn {
+      animation: pulse 1s infinite;
+    }
+
+    .start-btn.clicked {
+      animation: none;
+    }
+
+    .button-row button:hover {
+      background-color: #e6d7a8;
+      transform: scale(1.05);
+    }
+
+    .log {
+      font-size: clamp(0.9rem, 1.8vw, 1.2rem);
+      color: #fff;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 5px 10px;
+      border-radius: 10px;
+      border: 2px solid #ff9900;
+      max-width: 90%;
+      margin-bottom: 100px;
+      z-index: 9;
+      font-family: 'Chalkduster', 'Courier New', monospace;
+      text-shadow: 1px 1px #000;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      margin: 20px auto;
+      position: relative;
+    }
+
+    .countdown {
+      font-size: clamp(2.2rem, 5.5vw, 4.4rem);
+      font-weight: bold;
+      color: #ffc34d;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 20;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 1.2rem 2.4rem;
+      border-radius: 12px;
+    }
+
+    .bang:active {
+      transform: scale(1.2);
+      filter: brightness(1.5);
+      transition: transform 0.1s, filter 0.1s;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .quick-draw {
+      font-size: clamp(1.8rem, 3.3vw, 2.2rem);
+      color: #ffcc00;
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 15;
+      animation: flash 0.5s 3;
+    }
+
+    @keyframes flash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .emoji {
+      font-size: clamp(1.8rem, 3.3vw, 2.2rem);
+    }
+
+    #backgroundWrapper {
+      width: 640px;
+      height: 480px;
+      max-width: 100%;
+      background-image: url('assets/DexHuntBackground.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    #gameCanvas {
+      position: relative;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: transparent;
+    }
+
+    .bang {
+      position: absolute;
+      display: none;
+      z-index: 10;
+      cursor: pointer;
+      animation: pulse 0.3s infinite;
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+    }
+
+    .leaderboard-popup,
+    .tutorial-popup,
+    .double-or-nothing-popup,
+    .settings-popup,
+    .rewards-popup,
+    .notification-popup,
+    .wallet-popup,
+    .cookie-consent {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.85);
+      color: #f0c420;
+      border: 2px solid #ff9900;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      max-width: 90%;
+      text-align: center;
+    }
+
+    .share-buttons {
+      margin-top: 15px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .share-btn,
+    .sound-toggle-btn,
+    .reset-btn,
+    .cookie-btn {
+      background: #1a1a1a;
+      border: 2px solid #ff9900;
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+      cursor: pointer;
+      color: #f0c420;
+      font-weight: bold;
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .share-btn:hover,
+    .sound-toggle-btn:hover,
+    .reset-btn:hover,
+    .cookie-btn:hover {
+      background-color: #e6d7a8;
+    }
+
+    #loadingScreen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      color: #ffc34d;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: clamp(1.8rem, 3.3vw, 2.2rem);
+      z-index: 1000;
+      flex-direction: column;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #ff9900;
+      border-top: 4px solid #cc7a00;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-top: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    footer {
+      position: relative;
+      bottom: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 5px;
+      color: #a9a9a9;
+      font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+      width: 100%;
+      border-top: 4px solid #ffcc00;
+      z-index: 10;
+    }
+
+    footer a {
+      color: #00ffff;
+      font-weight: bold;
+      text-decoration: underline;
+      margin: 0 5px;
+    }
+
+    .dark-mode-btn {
+      color: #ffc34d;
+      margin: 0 15px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .dark-mode-btn:hover {
+      color: #ff9900;
+    }
+
+    .ambient-lantern {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 40px;
+      height: 40px;
+      background: radial-gradient(circle, rgba(255, 204, 0, 0.5) 0%, transparent 70%);
+      animation: flicker 3s infinite;
+      z-index: 0;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(0.9); }
+    }
+
+    @keyframes moveCloud {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100vw); }
+    }
+
+    @media (max-width: 600px) {
+      .bang {
+        width: 165px;
+        height: 165px;
+      }
+
+      .top-bar {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .top-bar h1 {
+        text-align: center;
+      }
+
+      .top-bar .button-row {
+        justify-content: center;
+      }
+
+      .top-bar .wallet-hud {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading-screen" id="loadingScreen">
+    <div style="text-align:center; margin-top:40px;">
+      ⏳ Loading DexHunt...
+      <div class="spinner" style="margin: 20px auto;"></div>
+    </div>
+  </div>
+
+  <div class="cookie-consent" id="cookieConsent">
+    <p>We use local storage to save your game progress and stats. Accept to continue.</p>
+    <button class="cookie-btn" onclick="acceptCookies()">Accept</button>
+  </div>
+
+  <!-- Audio Elements -->
+  <audio id="gunshot" preload="auto" src="assets/sounds/revovler-sound-328431.mp3"></audio>
+  <audio id="toosoon" preload="auto" src="assets/sounds/click_sound.mp3"></audio>
+  <audio id="winSound" preload="auto" src="assets/sounds/multi-coin-payout-14-213732.mp3"></audio>
+  <audio id="loseSound" preload="auto" src="assets/sounds/8-bit-video-game-lose-sound-version-1-145828.mp3"></audio>
+  <audio id="resetSound" preload="auto" src="assets/sounds/clean-revolver-reload-6889.mp3"></audio>
+  <audio id="startSound" preload="auto" src="assets/sounds/coin-donation-1-180437.mp3"></audio>
+  <audio id="walletSound" preload="auto" src="assets/sounds/yeehaw-13229.mp3"></audio>
+  <audio id="coyoteHowl" preload="auto" src="assets/sounds/coyote-howl.mp3"></audio>
+  <audio id="drawSound" preload="auto" src="assets/sounds/draw-sound.mp3"></audio>
+  <audio id="backgroundMusic" loop preload="auto">
+    <source src="assets/sounds/background_music.mp3" type="audio/mpeg"/>
+  </audio>
+
+  <div class="game-container" id="game">
+    <div class="top-bar">
+      <h1><span class="emoji">🤠</span> DexHunt: Cowboy Reflex Showdown</h1>
+      <div class="button-row">
+        <button class="start-btn" onclick="startDuel()">Start Duel</button>
+        <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+        <button class="links-leaderboard-btn" onclick="toggleLinksLeaderboard()">📊</button>
+        <button class="tutorial-btn" onclick="toggleTutorial()">❓</button>
+        <button class="wallet-btn" onclick="connectWallet()" id="connectWalletBtn">💼</button>
+      </div>
+      <div class="wallet-hud" id="walletHUD">
+        💰 $SALOONA: 0 | ⚡ Best Draw: --ms | 🔥 Streak: 0
+      </div>
+      <div class="beta-label">Beta Testing</div>
+    </div>
+
+    <div class="duel-area" id="duel-area">
+      <div id="backgroundWrapper">
+        <canvas id="gameCanvas"></canvas>
+        <img src="assets/pow_explosion.png" id="bang" class="bang" alt="POW explosion target" title="Click to shoot" onclick="shoot();" />
+        <div class="countdown" id="countdown" style="display:none;"></div>
+        <div class="quick-draw" id="quickDraw" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div class="log" id="log">All rewards are simulated on Solana Devnet. No real-world value. Think you’re quick enough, cowboy? Beat Sawn-Off Slim in under 0.5 seconds!</div>
+    <div class="ambient-lantern"></div>
+
+    <!-- Popups -->
+    <div class="leaderboard-popup" id="leaderboardPopup"></div>
+    <div class="tutorial-popup" id="tutorialPopup">
+      <h3>Welcome to DexHunt!</h3>
+      <p>1. Click "Start Duel" and wait for the countdown.</p>
+      <p>2. Click "BANG!" fast to win simulated rewards:</p>
+      <p>- Under 500ms: Earn $SALOONA (beta only).</p>
+      <p>- Under 250ms: High score!</p>
+      <p>Wallet connection and NFTs coming soon!</p>
+      <button aria-label="Close tutorial" onclick="closeTutorial()">Got It!</button>
+    </div>
+    <div class="double-or-nothing-popup" id="doubleOrNothingPopup">
+      <h3>Double or Nothing!</h3>
+      <p>5 losses in a row! Risk your streak to double your $SALOONA?</p>
+      <button aria-label="Accept Double or Nothing challenge" class="share-btn" onclick="startDoubleOrNothing()">Yes</button>
+      <button aria-label="Decline Double or Nothing challenge" class="share-btn" onclick="declineDoubleOrNothing()">No</button>
+    </div>
+    <div class="settings-popup" id="settingsPopup">
+      <h3>Settings</h3>
+      <button aria-label="Toggle game sound" class="sound-toggle-btn" onclick="toggleSound()">Mute Sound</button>
+      <button aria-label="Toggle background music" class="sound-toggle-btn" onclick="toggleBackgroundMusic()">Mute Music</button>
+      <button aria-label="Reset stats" class="reset-btn" onclick="resetStats()">Reset Stats</button>
+      <button aria-label="Reset the duel" class="reset-btn" onclick="resetDuel()">Reset Duel</button>
+      <button aria-label="Close settings" class="share-btn" onclick="toggleSettings()">Close</button>
+      <button aria-label="View legal information" class="share-btn" onclick="window.open('legal/legal.html', '_blank')">Legal</button>
+      <p style="margin-top:1rem;">
+        <a href="legal/terms_and_conditions.html" target="_blank" style="color: #00ffff;">Terms</a> |
+        <a href="legal/privacy_policy.html" target="_blank" style="color: #00ffff;">Privacy</a> |
+        <a href="legal/disclaimer.html" target="_blank" style="color: #00ffff;">Disclaimer</a>
+      </p>
+    </div>
+    <div class="rewards-popup" id="rewardsPopup">
+      <h3>Rewards</h3>
+      <p>Check your simulated $SALOONA earnings!</p>
+      <p>Mock Reward: <span id="mockRewardStatus">None</span></p>
+      <button aria-label="Close rewards popup" class="share-btn" onclick="toggleRewardsPopup()">Close</button>
+    </div>
+    <div class="notification-popup" id="notificationPopup">
+      <p>Enjoying the beta? Let us know your feedback!</p>
+      <button class="share-btn" onclick="closeNotification()">Close</button>
+    </div>
+    <div class="wallet-popup" id="walletPopup" style="display: none;">
+      <h3>Mock Wallet Connection (Devnet)</h3>
+      <p>Simulate connecting a Solana wallet to test $SALOONA rewards.</p>
+      <button class="share-btn" onclick="mockConnectWallet()">Connect Wallet</button>
+      <button class="share-btn" onclick="toggleWalletPopup()">Skip</button>
+      <div id="jupiterSwapWidget" style="margin-top: 15px;"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      <a href="legal/disclaimer.html">Disclaimer</a> |
+      <a href="legal/privacy_policy.html">Privacy Policy</a> |
+      <a href="legal/terms_and_conditions.html">Terms & Conditions</a>
+    </p>
+    <p>© 2025 Saloona Arcade - Powered by Solana 👾</p>
+  </footer>
+
+  <script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.js"></script>
+  <script>
+    let duelStarted = false;
+    let drawTime = 0;
+    let duelTimeout = null;
+    let saloona = parseInt(localStorage.getItem("saloonaBalance")) || 0;
+    let bestDraw = parseInt(localStorage.getItem("bestDraw")) || null;
+    let lossStreak = 0;
+    let winStreak = 0;
+    let isConnected = false;
+    let gameStarted = false;
+    let walletPublicKey = null;
+    let hasInteracted = false;
+    let tutorialShown = localStorage.getItem("tutorialShown") === "true";
+    let canvas = document.getElementById("gameCanvas");
+    let ctx = canvas.getContext("2d");
+    let hitEffect = { active: false, x: 0, y: 0, radius: 10 };
+
+    // Animation image variables
+    let cloud1, cloud2, cowboy;
+
+    // Animation state
+    let animations = [
+      { img: null, x: canvas.width - 55, y: canvas.height - 150, width: 60, height: 60, animation: "cowboy", duration: 1000, lastUpdate: 0, loop: true, zIndex: 4 },
+      { img: null, x: -100, y: 175, width: 300, height: 180, speed: 0.005, animation: "moveCloud", duration: 25000, lastUpdate: 0, loop: true, zIndex: 1 },
+      { img: null, x: -100, y: 70, width: 240, height: 140, speed: 0.25, animation: "moveCloud", duration: 30000, lastUpdate: 0, loop: true, zIndex: 2 }
+    ];
+
+    // DOM elements
+    const bang = document.getElementById("bang");
+    const countdown = document.getElementById("countdown");
+    const quickDraw = document.getElementById("quickDraw");
+    const log = document.getElementById("log");
+    const startBtn = document.querySelector(".start-btn");
+
+    function preloadImages() {
+      cloud1 = new Image();
+      cloud1.src = "assets/cloud1.png";
+      cloud1.onload = () => console.log("Cloud1 loaded");
+      cloud1.onerror = () => {
+        console.error("Failed to load cloud1.png");
+        log.textContent = "Error loading cloud1.png. Refresh to try again.";
+      };
+
+      cloud2 = new Image();
+      cloud2.src = "assets/cloud2.png";
+      cloud2.onload = () => console.log("Cloud2 loaded");
+      cloud2.onerror = () => {
+        console.error("Failed to load cloud2.png");
+        log.textContent = "Error loading cloud2.png. Using fallback.";
+        cloud2 = cloud1; // Fallback to cloud1
+      };
+
+      cowboy = new Image();
+      cowboy.src = "assets/cowboy.png";
+      cowboy.onload = () => console.log("Cowboy loaded");
+      cowboy.onerror = () => {
+        console.error("Failed to load cowboy.png");
+        log.textContent = "Error loading cowboy asset. Refresh or check assets.";
+      };
+    }
+
+    function animateElements(timestamp) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      animations.sort((a, b) => a.zIndex - b.zIndex);
+
+      animations.forEach((anim, index) => {
+        if (!anim.img) {
+          if (anim.animation === "cowboy") anim.img = cowboy;
+          if (anim.animation === "moveCloud") {
+            anim.img = (index === 1 && cloud1) ? cloud1 : (cloud2 || cloud1);
+          }
+        }
+
+        if (anim.img && anim.img.complete && anim.img.naturalWidth !== 0) {
+          if (!anim.lastUpdate) anim.lastUpdate = timestamp;
+          const elapsed = timestamp - anim.lastUpdate;
+          const progress = (elapsed % anim.duration) / anim.duration;
+
+          if (anim.animation === "moveCloud") {
+            anim.x = -anim.width + (canvas.width + anim.width) * progress;
+            anim.y = anim.y;
+          } else if (anim.animation === "cowboy") {
+            anim.x = canvas.width - 70;
+            anim.y = canvas.height - 150;
+            if (duelStarted && drawTime > 0 && performance.now() - drawTime < 500) {
+              anim.opacity = 0.5;
+            } else {
+              anim.opacity = 1;
+            }
+          }
+
+          ctx.globalAlpha = anim.opacity || 1;
+          ctx.drawImage(anim.img, anim.x, anim.y, anim.width, anim.height);
+          ctx.globalAlpha = 1;
+        } else {
+          console.error("Failed to draw animation", index, "image:", anim.img?.src, "loaded:", !!anim.img, "complete:", anim.img?.complete);
+        }
+      });
+
+      if (hitEffect.active) {
+        ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+        ctx.beginPath();
+        ctx.arc(hitEffect.x, hitEffect.y, hitEffect.radius, 0, Math.PI * 2);
+        ctx.fill();
+        hitEffect.radius += 2;
+        if (hitEffect.radius > 50) hitEffect.active = false;
+      }
+
+      requestAnimationFrame(animateElements);
+    }
+
+    function resizeCanvas() {
+      const wrapper = document.getElementById("backgroundWrapper");
+      const canvas = document.getElementById("gameCanvas");
+
+      if (!wrapper || !canvas) {
+        console.error("Missing wrapper or canvas");
+        return;
+      }
+
+      const bounds = wrapper.getBoundingClientRect();
+      canvas.width = bounds.width;
+      canvas.height = bounds.height;
+
+      animations.forEach(anim => {
+        if (anim.y < 50) anim.y = 50;
+        if (anim.y > canvas.height - anim.height - 20) {
+          anim.y = canvas.height - anim.height - 20;
+        }
+        if (anim.animation === "cowboy") {
+          anim.x = canvas.width - 70;
+          anim.y = canvas.height - 150;
+        }
+      });
+    }
+
+    function showGameContent() {
+      const loadingScreen = document.getElementById('loadingScreen');
+      if (loadingScreen) {
+        loadingScreen.style.display = 'none';
+      } else {
+        console.error("Error: Could not find #loadingScreen");
+      }
+
+      if (!localStorage.getItem("cookiesAccepted")) {
+        document.getElementById("cookieConsent").style.display = "block";
+      }
+
+      if (!tutorialShown) {
+        toggleTutorial();
+      }
+      gameStarted = true;
+    }
+
+    function acceptCookies() {
+      localStorage.setItem("cookiesAccepted", "true");
+      document.getElementById("cookieConsent").style.display = "none";
+    }
+
+    function checkJurisdiction() {
+      fetch("https://ipapi.co/json/")
+        .then(response => response.json())
+        .then(data => {
+          const restricted = ["US", "CN", "CA", "FR", "SG", "IR", "KP", "SY", "CU", "AE", "QA", "NL"];
+          if (restricted.includes(data.country_code)) {
+          log.textContent = "⚠️ Access restricted in your region. Proceed at your own risk. All rewards are simulated with no real-world value. For the best experience, please zoom to 150% during beta. I am working on a scaling fix!";
+          }
+        })
+        .catch(err => console.error("Jurisdiction check failed:", err));
+    }
+
+    function playBackgroundMusic() {
+      if (!hasInteracted) {
+        const bgMusic = document.getElementById("backgroundMusic");
+        bgMusic.volume = 0.5;
+        bgMusic.play().catch(err => console.error("Error playing music:", err));
+        hasInteracted = true;
+      }
+    }
+
+    function updateWalletHUD() {
+      const hud = document.getElementById("walletHUD");
+      hud.innerHTML = `💰 $SALOONA: ${saloona} | ⚡ Best Draw: ${bestDraw || '--'}ms | 🔥 Streak: ${winStreak}`;
+    }
+
+    function startCountdown(callback) {
+      let count = 3;
+      countdown.style.display = "block";
+      countdown.innerText = count;
+
+      const ticker = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countdown.innerText = count;
+        } else {
+          clearInterval(ticker);
+          countdown.style.display = "none";
+          callback();
+        }
+      }, 1000);
+    }
+
+    function startDuel() {
+      if (duelStarted || !gameStarted) {
+        console.log("Duel blocked: duelStarted=", duelStarted, "gameStarted=", gameStarted);
+        return;
+      }
+      console.log("Starting duel");
+      duelStarted = true;
+      startBtn.classList.add("clicked");
+      document.getElementById("startSound").play();
+      startCountdown(() => {
+        drawTime = performance.now();
+        quickDraw.style.display = "block";
+        document.getElementById("drawSound").play();
+
+        const wrapper = document.getElementById("backgroundWrapper");
+        const rect = wrapper.getBoundingClientRect();
+        const powWidth = 120;
+        const powHeight = 120;
+
+        const minX = 20;
+        const maxX = rect.width - powWidth - 20;
+        const minY = 20;
+        const maxY = rect.height / 2 - powHeight;
+
+        const randX = Math.random() * (maxX - minX) + minX;
+        const randY = Math.random() * (maxY - minY) + minY;
+
+        bang.style.left = `${randX}px`;
+        bang.style.top = `${randY}px`;
+        bang.style.display = "block";
+      });
+    }
+
+    function shoot() {
+      const now = performance.now();
+      if (!duelStarted) {
+        console.log("Shoot ignored: duel not started");
+        return;
+      }
+
+      document.getElementById("gunshot").play();
+      setTimeout(() => {
+        document.getElementById("resetSound").play();
+      }, 300);
+
+      if (drawTime === 0) {
+        document.getElementById("toosoon").play();
+        log.textContent = "Too soon! You fired before the signal.";
+        resetDuel();
+        return;
+        let duelLogs = JSON.parse(localStorage.getItem("duelLogs") || "[]");
+        duelLogs.push({ time: Date.now(), reaction: reaction });
+        localStorage.setItem("duelLogs", JSON.stringify(duelLogs));
+      }
+
+      const reaction = Math.floor(now - drawTime);
+      drawTime = 0;
+      bang.style.display = "none";
+      quickDraw.style.display = "none";
+
+      hitEffect.active = true;
+      hitEffect.x = parseFloat(bang.style.left) + 60;
+      hitEffect.y = parseFloat(bang.style.top) + 60;
+      hitEffect.radius = 10;
+
+      if (reaction <= 600) {
+        const reward = 5 + Math.floor(Math.max(0, 300 - reaction) / 25);
+        saloona += reward;
+        winStreak++;
+        localStorage.setItem("saloonaBalance", saloona);
+        if (!bestDraw || reaction < bestDraw) {
+          bestDraw = reaction;
+          localStorage.setItem("bestDraw", bestDraw);
+        }
+        document.getElementById("winSound").play();
+        log.textContent = `🎯 Shot in ${reaction}ms! Earned ${reward} $SALOONA (simulated). Streak: ${winStreak}!`;
+        lossStreak = 0;
+
+        if (isConnected) {
+          performMockSwap(reward);
+        }
+
+        if (winStreak === 3) {
+          log.textContent += " 🤠 Nice streak! Keep it up!";
+        } else if (winStreak === 5) {
+          log.textContent += " 🔥 Hot shot! 5 wins in a row!";
+          document.getElementById("mockRewardStatus").textContent = "Mock Reward Earned!";
+        }
+      } else {
+        document.getElementById("loseSound").play();
+        log.textContent = `Too slow! Your draw was ${reaction}ms. Streak ended.`;
+        lossStreak++;
+        winStreak = 0;
+        if (lossStreak >= 5) {
+          showDoubleOrNothing();
+        }
+      }
+
+      updateWalletHUD();
+      log.innerHTML += '<br><button id="stopButton" onclick="cancelAutoRestart()">🛑 STOP!</button>';
+
+      resetDuel();
+      duelTimeout = setTimeout(() => {
+        const stopBtn = document.getElementById("stopButton");
+        if (stopBtn) stopBtn.remove();
+        log.textContent = "Auto-restarting duel to test your reflexes again!";
+        startDuel();
+      }, 4000);
+
+      if (gameStarted && (lossStreak + saloona / 5) % 3 === 0) {
+        showNotification();
+      }
+    }
+
+    function resetDuel() {
+      console.log("Resetting duel");
+      duelStarted = false;
+      drawTime = 0;
+      clearTimeout(duelTimeout);
+      duelTimeout = null;
+      bang.style.display = "none";
+      quickDraw.style.display = "none";
+      startBtn.classList.remove("clicked");
+    }
+
+    function cancelAutoRestart() {
+      console.log("Canceling auto-restart");
+      clearTimeout(duelTimeout);
+      duelTimeout = null;
+      const stopBtn = document.getElementById("stopButton");
+      if (stopBtn) stopBtn.remove();
+      log.textContent = "Auto-restart canceled. Click 'Start Duel' when ready.";
+      resetDuel();
+    }
+
+    function showDoubleOrNothing() {
+      const doubleOrNothingPopup = document.getElementById("doubleOrNothingPopup");
+      doubleOrNothingPopup.style.display = "block";
+    }
+
+    function startDoubleOrNothing() {
+      const doubleOrNothingPopup = document.getElementById("doubleOrNothingPopup");
+      doubleOrNothingPopup.style.display = "none";
+      log.textContent = "Double or Nothing challenge started! Win to double your $SALOONA!";
+      resetDuel();
+      startDuel();
+    }
+
+    function declineDoubleOrNothing() {
+      const doubleOrNothingPopup = document.getElementById("doubleOrNothingPopup");
+      doubleOrNothingPopup.style.display = "none";
+      lossStreak = 0;
+      log.textContent = "Double or Nothing declined. Keep dueling!";
+      resetDuel();
+    }
+
+    function toggleSettings() {
+      const settingsPopup = document.getElementById("settingsPopup");
+      settingsPopup.style.display = settingsPopup.style.display === "block" ? "none" : "block";
+    }
+
+    function toggleSound() {
+      const sounds = document.querySelectorAll("audio:not(#backgroundMusic)");
+      const isMuted = sounds[0].muted;
+      sounds.forEach(s => {
+        s.muted = !isMuted;
+        s.volume = 0.6;
+      });
+      document.querySelector(".sound-toggle-btn").textContent = isMuted ? "Mute Sound" : "Unmute Sound";
+    }
+
+    function toggleBackgroundMusic() {
+      const bgMusic = document.getElementById("backgroundMusic");
+      bgMusic.muted = !bgMusic.muted;
+      bgMusic.volume = 0.5;
+      document.querySelector(".settings-popup button:nth-child(2)").textContent = bgMusic.muted ? "Unmute Music" : "Mute Music";
+    }
+
+    function resetStats() {
+      saloona = 0;
+      bestDraw = null;
+      winStreak = 0;
+      lossStreak = 0;
+      localStorage.setItem("saloonaBalance", saloona);
+      localStorage.setItem("bestDraw", bestDraw);
+      updateWalletHUD();
+      log.textContent = "Stats reset! Start dueling to earn simulated rewards.";
+      resetDuel();
+    }
+
+    function toggleLinksLeaderboard() {
+      const leaderboardPopup = document.getElementById("leaderboardPopup");
+      leaderboardPopup.style.display = leaderboardPopup.style.display === "block" ? "none" : "block";
+      leaderboardPopup.innerHTML = `
+        <h3>Stats</h3>
+        <p>Best Draw: ${bestDraw || '--'}ms</p>
+        <p>$SALOONA Balance: ${saloona}</p>
+        <p>Win Streak: ${winStreak}</p>
+        <button class="share-btn" onclick="toggleLinksLeaderboard()">Close</button>
+      `;
+    }
+
+    function toggleTutorial() {
+      const tutorialPopup = document.getElementById("tutorialPopup");
+      tutorialPopup.style.display = tutorialPopup.style.display === "block" ? "none" : "block";
+    }
+
+    function closeTutorial() {
+      const tutorialPopup = document.getElementById("tutorialPopup");
+      tutorialPopup.style.display = "none";
+      localStorage.setItem("tutorialShown", "true");
+      tutorialShown = true;
+    }
+
+    function toggleRewardsPopup() {
+      const rewardsPopup = document.getElementById("rewardsPopup");
+      rewardsPopup.style.display = rewardsPopup.style.display === "block" ? "none" : "block";
+      document.getElementById("mockRewardStatus").textContent = winStreak >= 5 ? "Mock Reward Earned!" : "None";
+    }
+
+    function showNotification() {
+      const notificationPopup = document.getElementById("notificationPopup");
+      notificationPopup.style.display = "block";
+    }
+
+    function closeNotification() {
+      const notificationPopup = document.getElementById("notificationPopup");
+      notificationPopup.style.display = "none";
+    }
+
+    function toggleWalletPopup() {
+      const walletPopup = document.getElementById("walletPopup");
+      walletPopup.style.display = walletPopup.style.display === "block" ? "none" : "block";
+    }
+
+    function mockConnectWallet() {
+      isConnected = true;
+      walletPublicKey = "MockWallet123";
+      document.getElementById("connectWalletBtn").textContent = "💼 Mock";
+      document.getElementById("connectWalletBtn").onclick = disconnectWallet;
+      document.getElementById("walletSound").play();
+      log.textContent = "Mock wallet connected! $SALOONA rewards will be simulated.";
+      toggleWalletPopup();
+      updateWalletHUD();
+      initJupiterSwapWidget();
+    }
+
+    function disconnectWallet() {
+      isConnected = false;
+      walletPublicKey = null;
+      document.getElementById("connectWalletBtn").textContent = "💼";
+      document.getElementById("connectWalletBtn").onclick = connectWallet;
+      log.textContent = "Mock wallet disconnected.";
+      updateWalletHUD();
+      toggleWalletPopup();
+    }
+
+    function connectWallet() {
+      toggleWalletPopup();
+    }
+
+    function initJupiterSwapWidget() {
+      const widgetContainer = document.getElementById("jupiterSwapWidget");
+      widgetContainer.innerHTML = `
+        <p>Simulated Jupiter Swap (Devnet)</p>
+        <p>Swap $SALOONA rewards in future updates!</p>
+      `;
+    }
+
+    function performMockSwap(amount) {
+      log.textContent = `Simulating swap of ${amount} $SALOONA on Devnet...`;
+      setTimeout(() => {
+        log.textContent = `Mock swap complete: ${amount} $SALOONA processed!`;
+      }, 2000);
+    }
+
+    // 🎯 Lightweight play tracking
+    let lastActivity = localStorage.getItem("lastPlayTimestamp");
+    if (!lastActivity) {
+      localStorage.setItem("lastPlayTimestamp", Date.now());
+    } else {
+      const now = Date.now();
+      const diffHours = (now - parseInt(lastActivity)) / (1000 * 60 * 60);
+      if (diffHours > 1) {
+        console.log("🔍 Someone likely played recently. Last play was", new Date(parseInt(lastActivity)).toLocaleString());
+      }
+      localStorage.setItem("lastPlayTimestamp", now);
+    }
+
+    // ⌛ Duel history tracker
+    if (!localStorage.getItem("duelLogs")) {
+      localStorage.setItem("duelLogs", JSON.stringify([]));
+    }
+
+
+    window.onload = function () {
+      console.log("window.onload triggered");
+      preloadImages();
+      resizeCanvas();
+      requestAnimationFrame(animateElements);
+      updateWalletHUD();
+      checkJurisdiction();
+
+      setTimeout(() => {
+        showGameContent();
+      }, 2000);
+
+      window.addEventListener("click", playBackgroundMusic);
+    };
+
+    window.addEventListener("resize", resizeCanvas);
+  </script>
+</body>
+</html>
