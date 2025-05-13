@@ -700,7 +700,7 @@
         .then(data => {
           const restricted = ["US", "CN", "CA", "FR", "SG", "IR", "KP", "SY", "CU", "AE", "QA", "NL"];
           if (restricted.includes(data.country_code)) {
-          log.textContent = "⚠️ Access restricted in your region. Proceed at your own risk. All rewards are simulated with no real-world value. For the best experience, please zoom to 150% during Beta Testing. I am working on a scaling fix!";
+          log.textContent = "⚠️ Access restricted in your region. Proceed at your own risk. All rewards are simulated with no real-world value. For the best experience, please zoom to 150% during beta. I am working on a scaling fix!";
           }
         })
         .catch(err => console.error("Jurisdiction check failed:", err));
@@ -787,6 +787,9 @@
         log.textContent = "Too soon! You fired before the signal.";
         resetDuel();
         return;
+        let duelLogs = JSON.parse(localStorage.getItem("duelLogs") || "[]");
+        duelLogs.push({ time: Date.now(), reaction: reaction });
+        localStorage.setItem("duelLogs", JSON.stringify(duelLogs));
       }
 
       const reaction = Math.floor(now - drawTime);
@@ -1009,6 +1012,25 @@
         log.textContent = `Mock swap complete: ${amount} $SALOONA processed!`;
       }, 2000);
     }
+
+    // 🎯 Lightweight play tracking
+    let lastActivity = localStorage.getItem("lastPlayTimestamp");
+    if (!lastActivity) {
+      localStorage.setItem("lastPlayTimestamp", Date.now());
+    } else {
+      const now = Date.now();
+      const diffHours = (now - parseInt(lastActivity)) / (1000 * 60 * 60);
+      if (diffHours > 1) {
+        console.log("🔍 Someone likely played recently. Last play was", new Date(parseInt(lastActivity)).toLocaleString());
+      }
+      localStorage.setItem("lastPlayTimestamp", now);
+    }
+
+    // ⌛ Duel history tracker
+    if (!localStorage.getItem("duelLogs")) {
+      localStorage.setItem("duelLogs", JSON.stringify([]));
+    }
+
 
     window.onload = function () {
       console.log("window.onload triggered");
